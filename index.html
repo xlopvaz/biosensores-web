@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biosensores para TDM · Validación analítica</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧪</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <span class="brand">TDM<span class="brand-dot">·</span>sensor</span>
+    <nav class="nav">
+      <a href="#intro">Fundamento</a>
+      <a href="#parametros">Parámetros</a>
+      <a href="#casos">Casos de estudio</a>
+      <a href="#calculadora">Zona terapéutica</a>
+      <a href="#referencias">Referencias</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div class="hero-text">
+      <p class="eyebrow-plain">Validación de Técnicas Analíticas · Máster en Investigación Química y Química Industrial, USC</p>
+      <h1>Biosensores en tiempo real para la monitorización terapéutica de fármacos en pacientes crónicos</h1>
+      <p class="hero-sub">Un recorrido interactivo por cómo se valida, parámetro a parámetro, un sensor que mide un fármaco directamente sobre el cuerpo del paciente — y por qué esa validación es la que decide si una dosis es segura.</p>
+      <div class="hero-meta">
+        <span>Autoría: <strong>[Nombre 1 · Nombre 2 · Nombre 3 · Nombre 4]</strong></span>
+        <span>Curso 2026–2027</span>
+      </div>
+    </div>
+    <div class="hero-trace" aria-hidden="true">
+      <svg viewBox="0 0 440 220" class="trace-svg">
+        <line x1="0" y1="110" x2="440" y2="110" class="trace-axis"/>
+        <path id="tracePath" class="trace-path"
+          d="M0,140 C40,138 60,60 95,55 C130,50 140,160 180,165 C220,170 235,75 270,70
+             C300,66 315,150 350,152 C385,154 400,95 440,100"/>
+        <circle class="trace-peak" cx="95" cy="55" r="3.2"/>
+        <circle class="trace-peak" cx="270" cy="70" r="3.2"/>
+      </svg>
+      <span class="trace-caption">respuesta de corriente simulada — no son datos de un sensor real</span>
+    </div>
+  </div>
+</section>
+
+<main>
+
+<section id="intro" class="section">
+  <div class="wrap narrow">
+    <h2>Por qué no todos los fármacos son buenos candidatos</h2>
+    <p>La validación analítica es el paso que separa una prueba de concepto de laboratorio de un dispositivo trasladable a la práctica clínica. No todos los fármacos son candidatos igual de buenos para la monitorización biosensorizada: para que tenga sentido desarrollar un sensor, el fármaco debe presentar variabilidad interindividual en su farmacocinética, estabilidad intraindividual en el tiempo, una relación clara entre concentración y respuesta clínica o toxicidad, una ventana terapéutica estrecha y biomarcadores farmacodinámicos disponibles.</p>
+    <p>Estos criterios explican por qué la vancomicina, el tacrolimus o la metformina concentran la mayoría de los desarrollos recientes en este campo — los tres casos que vamos a recorrer en esta página.</p>
+    <p class="source-note">Liang et al., 2024 — <em>Frontiers in Pharmacology</em></p>
+  </div>
+</section>
+
+<section id="parametros" class="section section-alt">
+  <div class="wrap">
+    <h2>Parámetros fundamentales de validación</h2>
+    <p class="section-lead">Toca cada parámetro para ver qué evalúa y qué particularidad tiene cuando el método no es una técnica de banco, sino un sensor que funciona pegado a la piel o circulando en sangre.</p>
+
+    <div class="param-list" id="paramList"></div>
+  </div>
+</section>
+
+<section id="casos" class="section">
+  <div class="wrap">
+    <h2>Tres casos de estudio reales</h2>
+    <p class="section-lead">Mismo marco de validación, tres fármacos muy distintos. Cambia de pestaña para comparar.</p>
+
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-case="vanco">Vancomicina</button>
+      <button class="tab" data-case="tacro">Tacrolimus</button>
+      <button class="tab" data-case="metf">Metformina</button>
+    </div>
+
+    <div class="case-panel" id="casePanel"></div>
+  </div>
+</section>
+
+<section id="calculadora" class="section section-alt">
+  <div class="wrap narrow">
+    <h2>¿Está en zona terapéutica?</h2>
+    <p class="section-lead">Introduce un valor y compáralo con los rangos reales descritos en los estudios. Esto es exactamente lo que automatizaría un biosensor en tiempo real.</p>
+
+    <div class="calc-card">
+      <div class="calc-row">
+        <label for="drugSelect">Fármaco</label>
+        <select id="drugSelect">
+          <option value="vanco">Vancomicina — AUC24h (mg·h/L)</option>
+          <option value="tacro">Tacrolimus — concentración en sangre (ng/mL)</option>
+          <option value="metf">Metformina — concentración en sudor (μM)</option>
+        </select>
+      </div>
+      <div class="calc-row">
+        <label for="valueInput">Valor medido</label>
+        <input type="number" id="valueInput" step="any" placeholder="Introduce un número">
+      </div>
+      <button id="calcBtn" class="calc-btn">Evaluar</button>
+      <div id="calcResult" class="calc-result" aria-live="polite"></div>
+      <p class="calc-source" id="calcSource"></p>
+    </div>
+  </div>
+</section>
+
+<section id="referencias" class="section">
+  <div class="wrap narrow">
+    <h2>Referencias</h2>
+    <ol class="ref-list">
+      <li>Liang WS, Beaulieu-Jones B, Smalley S, Snyder M, Goetz LH, Schork NJ. Emerging therapeutic drug monitoring technologies: considerations and opportunities in precision medicine. <em>Front Pharmacol</em>. 2024;15:1348112.</li>
+      <li>Liu Y, Mack JO, Shojaee M, Shaver A, George A, Clarke W, Patel N, Arroyo-Currás N. Analytical validation of aptamer-based serum vancomycin monitoring relative to automated immunoassays. <em>ACS Sens</em>. 2024;9(1):228–235.</li>
+      <li>Zhu H, Liao J, Wu W, Gu F, Zhu T, Huang X, Zhang J, Li L. PK/PD study of vancomycin in enterococcal infections: efficacy and safety assessment under the guidance of TDM. <em>Microbiology Spectrum</em>. 2026;14(7):e00937-26.</li>
+      <li>Glahn-Martínez B, Herranz S, Benito-Peña E, Orellana G, Moreno-Bondi MC. Antibody-based array for tacrolimus immunosuppressant monitoring with planar plastic waveguides activated with an aminodextran-lipase conjugate. <em>Anal Chem</em>. 2024;96(35):14142–14149.</li>
+      <li>Glahn-Martínez B, Lucchesi G, Pradanas-González F, Manzano AI, Canales Á, Caminati G, Benito-Peña E, Moreno-Bondi MC. Biosensing tacrolimus in human whole blood by using a drug receptor fused to the emerald green fluorescent protein. <em>Anal Chem</em>. 2022;94(47):16337–16344.</li>
+      <li>Zheng L, Deng W, Zhu Z, Cai J, Emran MY, Kotb A, Ma CB, Bai J, Zhou M. A skin-interfaced sensor for noninvasive monitoring of pharmacokinetic and pharmacodynamic responses. <em>Biosens Bioelectron</em>. 2026;295:118301.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p>Universidad de Santiago de Compostela — Máster en Investigación Química y Química Industrial</p>
+    <p class="footer-muted">Material elaborado como apoyo a la exposición oral. Los datos numéricos citan su fuente; el trazo del encabezado es ilustrativo.</p>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
