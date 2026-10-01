@@ -19,6 +19,7 @@
       <a href="#intro">Fundamento</a>
       <a href="#parametros">Parámetros</a>
       <a href="#casos">Casos de estudio</a>
+      <a href="#simuladores">Simuladores</a>
       <a href="#calculadora">Zona terapéutica</a>
       <a href="#referencias">Referencias</a>
     </nav>
@@ -85,7 +86,55 @@
   </div>
 </section>
 
-<section id="calculadora" class="section section-alt">
+<section id="simuladores" class="section section-alt">
+  <div class="wrap">
+    <h2>Simuladores interactivos</h2>
+    <p class="section-lead">Dos simulaciones simplificadas, con fines didácticos, para visualizar los conceptos de esta sección: cómo responde el sensor y cómo evoluciona el fármaco en el cuerpo tras una dosis.</p>
+
+    <div class="sim-card">
+      <h3 class="sim-title">1 · Curva de calibración del sensor</h3>
+      <p class="sim-sub">Mueve el slider para ver cómo respondería la señal a distinta concentración de analito.</p>
+      <div class="sim-layout">
+        <svg viewBox="0 0 440 240" class="sim-svg" id="calSvg" aria-hidden="true"></svg>
+        <div class="sim-controls">
+          <label for="calSlider">Concentración (escala logarítmica)</label>
+          <input type="range" id="calSlider" min="-9" max="-3" step="0.05" value="-6">
+          <div class="sim-readout" id="calReadout">—</div>
+          <div class="sim-status" id="calStatus"></div>
+        </div>
+      </div>
+      <p class="sim-disclaimer">Curva sigmoidal genérica con fines ilustrativos — no son datos de un sensor real.</p>
+    </div>
+
+    <div class="sim-card">
+      <h3 class="sim-title">2 · Perfil del fármaco tras una dosis</h3>
+      <p class="sim-sub">Modelo monocompartimental simplificado: concentración en plasma frente a una matriz alternativa (sudor/saliva), con el desfase ("lag time") entre ambas.</p>
+      <div class="sim-row">
+        <label for="pkDrug">Fármaco</label>
+        <select id="pkDrug">
+          <option value="vanco">Vancomicina</option>
+          <option value="tacro" selected>Tacrolimus</option>
+          <option value="metf">Metformina</option>
+        </select>
+      </div>
+      <div class="sim-layout">
+        <svg viewBox="0 0 440 240" class="sim-svg" id="pkSvg" aria-hidden="true"></svg>
+        <div class="sim-controls">
+          <label for="doseSlider">Dosis relativa</label>
+          <input type="range" id="doseSlider" min="0.5" max="2" step="0.1" value="1">
+          <div class="sim-legend">
+            <span><i class="dot dot-plasma"></i>Plasma</span>
+            <span><i class="dot dot-matrix"></i>Matriz alternativa (con lag)</span>
+            <span><i class="dot dot-band"></i>Banda terapéutica de referencia</span>
+          </div>
+        </div>
+      </div>
+      <p class="sim-disclaimer" id="pkDisclaimer"></p>
+    </div>
+  </div>
+</section>
+
+<section id="calculadora" class="section">
   <div class="wrap narrow">
     <h2>¿Está en zona terapéutica?</h2>
     <p class="section-lead">Introduce un valor y compáralo con los rangos reales descritos en los estudios. Esto es exactamente lo que automatizaría un biosensor en tiempo real.</p>
@@ -110,7 +159,7 @@
   </div>
 </section>
 
-<section id="referencias" class="section">
+<section id="referencias" class="section section-alt">
   <div class="wrap narrow">
     <h2>Referencias</h2>
     <ol class="ref-list">

@@ -377,6 +377,122 @@ p { margin: 0 0 1em; color: var(--text); }
   margin-bottom: 0;
 }
 
+/* ---------- Simuladores ---------- */
+.sim-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 28px 20px;
+  margin-bottom: 24px;
+}
+
+.sim-title { font-size: 1.15rem; margin-bottom: 4px; font-family: 'IBM Plex Sans', sans-serif; font-weight: 600; }
+.sim-sub { color: var(--text-muted); margin-bottom: 20px; max-width: 60ch; }
+
+.sim-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.sim-row label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.sim-row select {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.9rem;
+}
+
+.sim-layout {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 24px;
+  align-items: center;
+}
+
+.sim-svg {
+  width: 100%;
+  height: auto;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.sim-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sim-controls label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--amber);
+}
+
+.sim-readout {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.1rem;
+  color: var(--teal);
+}
+
+.sim-status {
+  font-size: 0.85rem;
+  font-weight: 500;
+  min-height: 1.2em;
+}
+
+.sim-status.ok { color: var(--teal); }
+.sim-status.low { color: var(--text-muted); }
+.sim-status.high { color: #ff9b9b; }
+
+.sim-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+.sim-legend span { display: flex; align-items: center; gap: 8px; }
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot-plasma { background: var(--amber); }
+.dot-matrix { background: var(--teal); }
+.dot-band { background: rgba(234, 243, 242, 0.25); }
+
+.sim-disclaimer {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin: 14px 0 0;
+}
+
+@media (max-width: 760px) {
+  .sim-layout { grid-template-columns: 1fr; }
+}
+
 /* ---------- Referencias ---------- */
 .ref-list {
   color: var(--text-muted);
