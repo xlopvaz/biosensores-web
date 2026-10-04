@@ -79,7 +79,8 @@
     <div class="tabs" role="tablist">
       <button class="tab active" data-case="vanco">Vancomicina</button>
       <button class="tab" data-case="tacro">Tacrolimus</button>
-      <button class="tab" data-case="metf">Metformina</button>
+<button class="tab" data-case="metf">Metformina</button>
+      <button class="tab" data-case="ldopa">L-DOPA</button>
     </div>
 
     <div class="case-panel" id="casePanel"></div>
@@ -130,6 +131,21 @@
         </div>
       </div>
       <p class="sim-disclaimer" id="pkDisclaimer"></p>
+    </div>
+
+    <div class="sim-card">
+      <h3 class="sim-title">3 · Estabilidad de la señal frente al tiempo (bioensuciamiento)</h3>
+      <p class="sim-sub">Basado en el caso de la banda de L-DOPA (Tai et al., 2019): mueve el slider para ver cómo decae la sensibilidad del sensor con el paso del tiempo, y por qué la ventana de uso real in vivo es mucho más corta que la estabilidad medida in vitro.</p>
+      <div class="sim-layout">
+        <svg viewBox="0 0 440 240" class="sim-svg" id="stabSvg" aria-hidden="true"></svg>
+        <div class="sim-controls">
+          <label for="stabSlider">Tiempo transcurrido (horas)</label>
+          <input type="range" id="stabSlider" min="0" max="48" step="0.5" value="2">
+          <div class="sim-readout" id="stabReadout">—</div>
+          <div class="sim-status" id="stabStatus"></div>
+        </div>
+      </div>
+      <p class="sim-disclaimer">Curva de decaimiento aproximada a partir de los datos descritos para la banda de L-DOPA (90 % de sensibilidad mantenida durante las primeras 24 h in vitro, con caída progresiva después; ventana de uso in vivo real de 3–4 h) (Tai et al., 2019). Forma de la curva simplificada con fines ilustrativos.</p>
     </div>
   </div>
 </section>

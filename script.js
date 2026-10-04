@@ -74,6 +74,18 @@ const CASES = {
     ],
     note: "La validación cruzada sudor–plasma es lo que permitió definir un rango terapéutico en sudor equivalente al ya conocido en plasma.",
     ref: "Zheng et al., 2026 — Biosensors and Bioelectronics"
+  },
+  ldopa: {
+    title: "L-DOPA",
+    sub: "Banda flexible (Caltech) para monitorización en pacientes con Parkinson",
+    stats: [
+      { label: "biorreceptor", value: "Enzima tirosinasa" },
+      { label: "exactitud validada frente a", value: "HPLC (extracciones de plasma)" },
+      { label: "estabilidad in vitro", value: "90% de sensibilidad a las 24 h" },
+      { label: "ventana de uso in vivo", value: "solo 3–4 h" }
+    ],
+    note: "La gran brecha entre la estabilidad in vitro (24 h) y la ventana de uso real in vivo (3–4 h) ilustra por qué la estabilidad de la señal es un parámetro de validación tan crítico como el LOD — ver simulador 3.",
+    ref: "Tai et al., 2019 — Nano Letters"
   }
 };
 
@@ -218,7 +230,6 @@ const calEC50 = -6;     // log10(M) punto medio de la curva (sensibilidad máxim
 const calHigh = -4;     // log10(M) a partir de aquí se considera saturación
 
 function calSignal(logC) {
-  // Hill function normalizada (0-100%) centrada en calEC50
   const x = logC - calEC50;
   return 100 / (1 + Math.pow(10, -x * 1.6));
 }
@@ -327,7 +338,6 @@ function drawPkSvg() {
   const svg = document.getElementById("pkSvg");
   const W = 440, H = 240, padL = 42, padR = 16, padT = 20, padB = 34;
 
-  // Escalar la curva para que el pico ronde el centro de la banda terapéutica
   const tPeak = Math.log(p.ka / p.ke) / (p.ka - p.ke);
   const rawPeak = bateman(tPeak, p.ka, p.ke);
   const bandMid = (p.band[0] + p.band[1]) / 2;
@@ -375,10 +385,96 @@ function setupPkSim() {
   document.getElementById("doseSlider").addEventListener("input", drawPkSvg);
 }
 
+// ---------- Simulador 3: estabilidad de la señal (bioensuciamiento) ----------
+const STAB_IN_VITRO_LIMIT = 24;   // h: sensibilidad ~estable hasta aquí
+const STAB_IN_VIVO_WINDOW = 3.5;  // h: ventana práctica real de uso in vivo
+
+function stabSensitivity(t) {
+  if (t <= STAB_IN_VITRO_LIMIT) {
+    return 100 - (10 * t) / STAB_IN_VITRO_LIMIT;
+  }
+  const extra = t - STAB_IN_VITRO_LIMIT;
+  return 90 * Math.exp(-extra / 14);
+}
+
+function drawStabSvg() {
+  const svg = document.getElementById("stabSvg");
+  const W = 440, H = 240, padL = 42, padR = 16, padT = 20, padB = 34;
+  const tMax = 48;
+
+  const xToPx = (t) => padL + (t / tMax) * (W - padL - padR);
+  const yToPx = (s) => (H - padB) - (s / 110) * (H - padT - padB);
+
+  let path = "";
+  const steps = 96;
+  for (let i = 0; i <= steps; i++) {
+    const t = (tMax * i) / steps;
+    const s = stabSensitivity(t);
+    path += (i === 0 ? "M" : "L") + xToPx(t).toFixed(1) + "," + yToPx(s).toFixed(1) + " ";
+  }
+
+  const vivoPx = xToPx(STAB_IN_VIVO_WINDOW);
+  const vitroPx = xToPx(STAB_IN_VITRO_LIMIT);
+
+  svg.innerHTML = `
+    <rect x="${padL}" y="${padT}" width="${(vivoPx - padL).toFixed(1)}" height="${(H - padB - padT).toFixed(1)}"
+      fill="rgba(95,217,200,0.14)"/>
+    <line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="var(--border)" stroke-width="1"/>
+    <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="var(--border)" stroke-width="1"/>
+    <line x1="${vitroPx}" y1="${padT}" x2="${vitroPx}" y2="${H - padB}" stroke="#ff9b9b" stroke-width="1" stroke-dasharray="4 3"/>
+    <text x="${vivoPx / 2 + padL / 2}" y="${padT + 12}" fill="var(--teal)" font-size="8.5" font-family="IBM Plex Mono, monospace" text-anchor="middle">uso in vivo real</text>
+    <text x="${vitroPx}" y="${padT - 6}" fill="#ff9b9b" font-size="8.5" font-family="IBM Plex Mono, monospace" text-anchor="middle">24 h</text>
+    <path d="${path}" fill="none" stroke="var(--amber)" stroke-width="2.2"/>
+    <circle id="stabPoint" cx="0" cy="0" r="5" fill="var(--teal)"/>
+    <text x="${padL}" y="${H - 10}" fill="var(--text-muted)" font-size="9" font-family="IBM Plex Mono, monospace">0 h</text>
+    <text x="${W - padR - 24}" y="${H - 10}" fill="var(--text-muted)" font-size="9" font-family="IBM Plex Mono, monospace">48 h</text>
+    <text x="6" y="${padT + 4}" fill="var(--text-muted)" font-size="8" font-family="IBM Plex Mono, monospace">% sensibilidad</text>
+  `;
+  updateStabPoint(parseFloat(document.getElementById("stabSlider").value));
+}
+
+function updateStabPoint(t) {
+  const svg = document.getElementById("stabSvg");
+  const W = 440, H = 240, padL = 42, padR = 16, padT = 20, padB = 34;
+  const tMax = 48;
+  const xToPx = (tt) => padL + (tt / tMax) * (W - padL - padR);
+  const yToPx = (s) => (H - padB) - (s / 110) * (H - padT - padB);
+
+  const s = stabSensitivity(t);
+  const point = svg.querySelector("#stabPoint");
+  if (point) {
+    point.setAttribute("cx", xToPx(t).toFixed(1));
+    point.setAttribute("cy", yToPx(s).toFixed(1));
+  }
+
+  document.getElementById("stabReadout").textContent =
+    `t = ${t.toFixed(1)} h → sensibilidad ≈ ${s.toFixed(0)}%`;
+
+  const statusEl = document.getElementById("stabStatus");
+  if (t <= STAB_IN_VIVO_WINDOW) {
+    statusEl.textContent = "Dentro de la ventana de uso práctico in vivo.";
+    statusEl.className = "sim-status ok";
+  } else if (t <= STAB_IN_VITRO_LIMIT) {
+    statusEl.textContent = "Estable in vitro, pero ya fuera de la ventana de uso real in vivo (requeriría exposición prolongada a iontoforesis).";
+    statusEl.className = "sim-status low";
+  } else {
+    statusEl.textContent = "Sensibilidad degradada por bioensuciamiento del electrodo y degradación enzimática.";
+    statusEl.className = "sim-status high";
+  }
+}
+
+function setupStabSim() {
+  drawStabSvg();
+  document.getElementById("stabSlider").addEventListener("input", (e) => {
+    updateStabPoint(parseFloat(e.target.value));
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   renderParams();
   setupTabs();
   setupCalc();
   setupCalSim();
   setupPkSim();
+  setupStabSim();
 });
