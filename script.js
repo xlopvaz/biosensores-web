@@ -158,6 +158,7 @@ function renderCase(key) {
   panel.innerHTML = `
     <h3 class="case-title">${c.title}</h3>
     <p class="case-sub">${c.sub}</p>
+    <div class="mech" id="mech"></div>
     <div class="case-stats">
       ${c.stats.map(s => `
         <div class="stat-box">
@@ -169,6 +170,9 @@ function renderCase(key) {
     <p class="case-note">${c.note}</p>
     <p class="case-ref">${c.ref}</p>
   `;
+  if (typeof mountMechanism === "function") {
+    mountMechanism(key, panel.querySelector("#mech"));
+  }
 }
 
 function setupTabs() {
