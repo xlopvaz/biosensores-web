@@ -107,7 +107,7 @@ const MECH_VANCO = {
       el("circle", { r: 8, fill: COL.amber }, mol);
       el("circle", { r: 3, fill: "#16100a", opacity: 0.35 }, mol);
       const e = electron(svg, COL.teal);
-      return { x, path, mb, mol, e, land: 0.26 + 0.06 * i };
+      return { x, path, mb, mol, e, land: 0.31 + 0.035 * i };
     });
     s.mbLabel = label(svg, 62, 134, "MB", { fill: COL.blue, size: 10 });
     s.drugLabel = label(svg, 340, 22, "● vancomicina (suero)", { fill: COL.amber, size: 10, anchor: "end" });
@@ -136,11 +136,11 @@ const MECH_VANCO = {
       a.mb.setAttribute("cx", mbx); a.mb.setAttribute("cy", mby);
 
       if (s.binds[i]) {
-        const fall = seg(t, a.land - 0.12, a.land);
+        const fall = seg(t, a.land - 0.08, a.land);
         const mx = lerp(x + 34, lerp(x + 12, x + 26, f), fall);
         const my = lerp(-20, lerp(176, 214, f), fall);
         a.mol.setAttribute("transform", `translate(${mx},${my})`);
-        a.mol.setAttribute("opacity", t > a.land - 0.13 ? 1 : 0);
+        a.mol.setAttribute("opacity", t > a.land - 0.085 ? 1 : 0);
       } else {
         a.mol.setAttribute("opacity", 0);
       }
@@ -151,7 +151,7 @@ const MECH_VANCO = {
       a.e.setAttribute("opacity", (t > 0.5 ? f : 0) * (1 - cyc) * 0.95);
     });
     s.mbLabel.setAttribute("opacity", 1 - seg(t, 0.2, 0.3));
-    s.drugLabel.setAttribute("opacity", seg(t, 0.15, 0.22) * (1 - seg(t, 0.85, 0.95)));
+    s.drugLabel.setAttribute("opacity", seg(t, 0.22, 0.28) * (1 - seg(t, 0.85, 0.95)));
     s.chart(t);
   }
 };
@@ -177,7 +177,7 @@ const MECH_TACRO = {
       const g = el("g", {}, svg);
       const halo = el("circle", { r: 16, fill: COL.green, opacity: 0 }, g);
       el("circle", { r: 8, fill: s.kind[i] === "drug" ? COL.amber : COL.green }, g);
-      return { x, g, halo, land: 0.28 + 0.05 * i, from: x + (i % 2 ? -36 : 36) };
+      return { x, g, halo, land: 0.31 + 0.045 * i, from: x + (i % 2 ? -36 : 36) };
     });
     s.lDrug = label(svg, 18, 40, "● tacrolimus (muestra)", { fill: COL.amber, size: 10 });
     s.lTracer = label(svg, 190, 40, "● trazador fluorescente", { fill: COL.green, size: 10 });
@@ -190,10 +190,10 @@ const MECH_TACRO = {
   frame(s, t) {
     s.ray.setAttribute("stroke-dashoffset", (-t * 600).toFixed(1));
     s.items.forEach((it, i) => {
-      const fall = seg(t, it.land - 0.12, it.land);
+      const fall = seg(t, it.land - 0.08, it.land);
       const x = lerp(it.from, it.x, fall), y = lerp(-20, 199, fall);
       it.g.setAttribute("transform", `translate(${x},${y})`);
-      it.g.setAttribute("opacity", t > it.land - 0.13 ? 1 : 0);
+      it.g.setAttribute("opacity", t > it.land - 0.085 ? 1 : 0);
       if (s.kind[i] === "tracer") {
         const on = seg(t, 0.56, 0.66);
         it.halo.setAttribute("opacity", (on * (0.25 + 0.2 * Math.sin(t * 60))).toFixed(2));
@@ -357,6 +357,8 @@ function mountMechanism(key, container) {
   const def = MECHANISMS[key];
   if (!def) { container.innerHTML = ""; return; }
 
+
+  const n = def.steps.length;
   container.innerHTML = `
     <div class="mech-head">
       <span class="mech-kicker">cómo funciona</span>
@@ -366,88 +368,95 @@ function mountMechanism(key, container) {
     <div class="mech-progress"><div class="mech-progress-bar"></div></div>
     <p class="mech-caption" aria-live="polite"></p>
     <div class="mech-controls">
-      <button type="button" class="mech-btn mech-play" aria-label="Pausar">❚❚</button>
-      <button type="button" class="mech-btn mech-restart" aria-label="Repetir desde el principio">↺</button>
+      <button type="button" class="mech-btn mech-prev" aria-label="Paso anterior">◀ Anterior</button>
+      <button type="button" class="mech-btn mech-next mech-primary">Empezar ▶</button>
       <div class="mech-steps">
         ${def.steps.map((_, i) => `<button type="button" class="mech-step" data-i="${i}" aria-label="Ir al paso ${i + 1}">${i + 1}</button>`).join("")}
       </div>
     </div>
-    <p class="mech-disclaimer">Esquema simplificado con fines didácticos, no a escala. La señal es ilustrativa, no son datos experimentales.</p>
+    <p class="mech-disclaimer">Avanza con los botones o con las flechas ← → del teclado. Esquema simplificado con fines didácticos, no a escala; la señal es ilustrativa, no son datos experimentales.</p>
   `;
 
   const svg = container.querySelector(".mech-svg");
   const caption = container.querySelector(".mech-caption");
   const bar = container.querySelector(".mech-progress-bar");
-  const playBtn = container.querySelector(".mech-play");
-  const restartBtn = container.querySelector(".mech-restart");
+  const prevBtn = container.querySelector(".mech-prev");
+  const nextBtn = container.querySelector(".mech-next");
   const stepBtns = [...container.querySelectorAll(".mech-step")];
 
   const state = def.build(svg);
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  let t = 0, playing = !reduced, last = null, raf = null, lastStep = -1, started = false;
+  // Cada paso i ocupa el tramo [inicio, fin] de la línea de tiempo 0–1
+  const start = (i) => def.steps[i].t;
+  const end = (i) => (i + 1 < n ? def.steps[i + 1].t - 0.001 : 1);
 
-  function stepIndex(tt) {
-    let idx = 0;
-    def.steps.forEach((s, i) => { if (tt >= s.t) idx = i; });
-    return idx;
-  }
+  let t = 0, cur = -1, target = 0, last = null, raf = null;
 
   function render() {
     def.frame(state, t);
-    bar.style.width = (t * 100).toFixed(1) + "%";
-    const idx = stepIndex(t);
-    if (idx !== lastStep) {
-      caption.innerHTML = `<span class="mech-n">${idx + 1}/${def.steps.length}</span> ${def.steps[idx].text}`;
-      stepBtns.forEach((b, i) => b.classList.toggle("active", i === idx));
-      lastStep = idx;
+    bar.style.width = (cur < 0 ? 0 : ((cur + (t - start(cur)) / (end(cur) - start(cur))) / n) * 100).toFixed(1) + "%";
+    if (cur < 0) {
+      caption.innerHTML = `<span class="mech-n">0/${n}</span> Pulsa «Empezar» para ver el mecanismo paso a paso.`;
+    } else {
+      caption.innerHTML = `<span class="mech-n">${cur + 1}/${n}</span> ${def.steps[cur].text}`;
     }
-    playBtn.textContent = playing ? "❚❚" : "▶";
-    playBtn.setAttribute("aria-label", playing ? "Pausar" : "Reproducir");
+    stepBtns.forEach((b, i) => {
+      b.classList.toggle("active", i === cur);
+      b.classList.toggle("done", i < cur);
+    });
+    prevBtn.disabled = cur < 0;
+    nextBtn.textContent = cur < 0 ? "Empezar ▶" : cur >= n - 1 ? "Repetir ↺" : "Siguiente ▶";
+    nextBtn.setAttribute("aria-label", cur >= n - 1 ? "Repetir desde el principio" : "Siguiente paso");
   }
 
   function tick(now) {
     if (last === null) last = now;
     const dt = now - last; last = now;
-    if (playing) {
-      t += dt / MECH_DURATION;
-      if (t >= 1) { t = 1; playing = false; }
-    }
+    t = Math.min(target, t + dt / MECH_DURATION);
     render();
-    raf = playing ? requestAnimationFrame(tick) : null;
+    raf = t < target ? requestAnimationFrame(tick) : null;
   }
 
-  function play() {
-    if (t >= 1) t = 0;
-    playing = true; last = null;
-    if (!raf) raf = requestAnimationFrame(tick);
+  function stop() { if (raf) cancelAnimationFrame(raf); raf = null; }
+
+  // Reproduce solo el tramo del paso i y se detiene al terminarlo
+  function goTo(i) {
+    stop();
+    cur = i;
+    t = start(i);
+    target = end(i);
+    if (reduced) { t = target; render(); return; }
+    last = null;
+    render();
+    raf = requestAnimationFrame(tick);
   }
-  function pause() { playing = false; render(); }
 
-  playBtn.addEventListener("click", () => (playing ? pause() : play()));
-  restartBtn.addEventListener("click", () => { t = 0; play(); });
-  stepBtns.forEach((b, i) => b.addEventListener("click", () => {
-    // ir al final del paso elegido (o al principio del siguiente) para verlo completo
-    const next = def.steps[i + 1] ? def.steps[i + 1].t - 0.005 : 1;
-    t = reduced ? next : def.steps[i].t;
-    if (reduced) { pause(); } else { play(); }
-  }));
+  function reset() { stop(); cur = -1; t = 0; target = 0; render(); }
 
-  // Empieza a reproducir solo cuando la animación es visible
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((en) => {
-      if (en.isIntersecting && !started) {
-        started = true;
-        if (!reduced) play();
-      }
-    });
-  }, { threshold: 0.35 });
-  io.observe(svg);
+  function next() {
+    if (cur >= n - 1) { reset(); return; }
+    goTo(cur + 1);
+  }
 
-  if (reduced) { t = 1; playing = false; }
+  function prev() {
+    stop();
+    if (cur <= 0) { reset(); return; }
+    cur -= 1;
+    t = end(cur);
+    render();
+  }
+
+  nextBtn.addEventListener("click", next);
+  prevBtn.addEventListener("click", prev);
+  stepBtns.forEach((b, i) => b.addEventListener("click", () => goTo(i)));
+  container.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight") { e.preventDefault(); next(); }
+    if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
+  });
+  container.setAttribute("tabindex", "0");
+
   render();
 
-  currentMech = {
-    destroy() { if (raf) cancelAnimationFrame(raf); io.disconnect(); }
-  };
+  currentMech = { destroy() { stop(); } };
 }
